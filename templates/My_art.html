@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block xx %}
+<div class="col-md-9">
+    {% if request.user.is_authenticated %}
+        <h1>{{ article_obj.title }}</h1>
+        <div class="article_content">
+            {{ article_obj.content|safe }}
+        </div>
+        {#    点赞点踩#}
+        <div id="div_digg" class="pull-right clearfix" style="margin-right: 20px; padding: 5px; font-size: 20px;" >
+            <span class="diggit action" >
+                <span class="glyphicon glyphicon-thumbs-up" id="digg_count" style="width: 20px;height: 20px;" >{{ article_obj.up_num }}</span>
+            </span>
+            <span class="buryit action" >
+                <span class="glyphicon glyphicon-thumbs-down" id="bury_count" style="margin-left: 10px">{{ article_obj.down_num }}</span>
+                <p id="error" style="color: red"></p>
+            </span>
+            <div class="clear"></div>
+            <div class="diggword" id="digg_tips">
+            </div>
+        </div>
+    {#评论楼开始#}
+        <div style="margin-top: 60px">
+        <ul class="list-group">
+           {% for item in comment_list %}
+                 <li class="list-group-item">
+                <span>#{{ forloop.counter }}楼</span>
+                <span>{{ item.content_time | date:'Y-m-d h:i:s'}}</span>
+                <span>{{ item.user.username }}</span>
+                <span ><a class="pull-right replay" username="{{ item.user.username }}" parent_id="{{ item.pk }}">回复</a></span>
+                <div>
+                    <span>
+                        {% if item.parent_id %}
+                            <p>@{{ item.parent.user.username }}</p>
+                        {% endif %}
+                            {{ item.content }}
+                    </span>
+                </div>
+                 </li>
+            {% endfor %}
+        {% endif %}
+</ul>
+    </div>
+{#评论楼结束#}
+{#    评论框开始#}
+    {% if request.user.is_authenticated %}
+        <div>
+        <p>
+            <p><span class="glyphicon glyphicon-edit"></span>发表评论</p>
+            <div>
+                <textarea name="content" id="id_comment" cols="60" rows="10" ></textarea>
+            </div>
+            <button class="btn btn-primary" id="id_button">提交评论</button>
+            <span id="error"></span>
+        </div>
+        {% else %}
+{#            <li><a href="{% url 'reg' %}">注册</a></li>#}
+{#            <li><a href="{% url 'login' %}">登录</a></li>#}
+        {% endif %}
+    </div>
+{#    评论框结束#}
+
+
+
+{% endblock %}
+
+{% block script %}
+        <script>
+        $(".action").click(function (){
+            {#alert($(this).hasClass('diggit'))#}
+            let is_up=($(this).hasClass('diggit'))
+            let $div = ($(this))        //保留当前点赞数
+            $.ajax({
+                url:"/U_or_D/",
+                type:"POST",
+                data:{
+                    "article_id":"{{ article_obj.pk }}",
+                    "is_up":is_up,
+                    "csrfmiddlewaretoken":"{{ csrf_token }}"
+                },
+                success:function (args) {
+                    if(args.code==200){
+                        $("#error").text(args.msg)
+                        let oldnum =$div.children().text()    //拿到div下span中的点赞数
+                        $div.children().text(Number(oldnum) + 1)
+                    }else{
+                        $("#error").html(args.msg)
+                    }
+                }
+            })
+        });
+
+        let parent_id = null;
+        $("#id_button").click(function () {
+            {#评论区的内容#}
+            let comment = $("#id_comment").val();
+            if(parent_id){
+                let index = comment.indexOf("\n") + 1
+                comment = comment.slice(index)
+            }
+            $.ajax({
+                url:"/comment/",
+                type: 'POST',
+                data:{
+                    "article_id":"{{ article_obj.pk }}",
+                    "comment":comment,
+                    "parentID":parent_id,
+                    "csrfmiddlewaretoken":"{{ csrf_token }}"
+                },
+                success:function (args) {
+                    if(args.code==200){
+                        $("#error").text(args.msg)
+                        //评论提交后在评论框中将之删除
+                        $("#id_comment").val("")
+
+                        //临时渲染评论人的用户名
+                        let username = {{ request.user.username }};
+                        //模板字符串，将评论框中的样式直接拷贝过来，去掉不需要的
+                        let temp ='' +
+                            '<li class="list-group-item">\n' +
+    '                            <span>${username}</span>\n' +
+    '                            <span><a href="#">回复</a></span>\n' +
+    '                            <div>\n' +
+    '                                <span>${comment}</span>\n' +
+'                                </div>';
+                        $(".list-group").append(temp)
+                        //清空全局变量
+                        parent_id = null;
+                    }
+                }
+            })
+        })
+
+        $(".replay").click(function () {
+            let username=$(this).attr("username")
+            //获取主键值，直接改为全局变量
+            parent_id = $(this).attr("parent_id")
+            //给评论框添加一个用户信息
+            $("#id_comment").val("@" + username +"\n").focus()
+        })
+    </script>
+{% endblock %}

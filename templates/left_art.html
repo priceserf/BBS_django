@@ -1,0 +1,30 @@
+<div class="panel panel-danger">
+    <div class="panel-heading">
+    <h3 class="panel-title">文章分类</h3>
+    </div>
+    <div class="panel-body">
+        {% for item in art_list %}
+            <div><a href="#">{{ item.0 }}({{ item.1 }})</a></div>
+        {% endfor %}
+    </div>
+</div>
+<div class="panel panel-warning">
+    <div class="panel-heading">
+    <h3 class="panel-title">标签分类</h3>
+    </div>
+    <div class="panel-body">
+        {% for item in tag_list %}
+            <div><a href="#">{{ item.0 }}({{ item.1 }})</a></div>
+        {% endfor %}
+    </div>
+</div>
+<div class="panel panel-primary">
+    <div class="panel-heading">
+    <h3 class="panel-title">日期归档</h3>
+    </div>
+    <div class="panel-body">
+        {% for item in tim_list %}
+            <div><a href="#">{{ item.0|date:"Y年-m月" }}({{ item.1 }})</a></div>
+        {% endfor %}
+    </div>
+</div>

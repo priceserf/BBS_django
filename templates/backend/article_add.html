@@ -1,0 +1,53 @@
+{% extends 'backend/base.html' %}
+
+{% block content %}
+    <form method="POST" action="/article_add/">
+        {% csrf_token %}
+        <div>
+            <h2>添加文章</h2>
+        </div>
+        <div style="width: 100%">
+            <p>标题</p>
+            <input type="text" name="title" id="id_title" class="form-control">
+        </div>
+
+        <div>
+            <p>文章简介</>
+            <input type="text" name="desc" id="id_desc" class="form-control">
+        </div>
+
+        <div>
+            <p>文章内容</p>
+            <textarea name="content" id="id_comment" cols="60" rows="10" ></textarea>
+        </div>
+
+        <div>
+        <p>分类</p>
+            {% for item in Category_list %}
+                    <input type="radio" value="{{ item.pk }}" name="Category">{{ item.name }}
+            {% endfor %}
+        </div>
+
+        <div>
+        <p>标签</p>
+            {% for item in Tag_list %}
+                    <input type="checkbox" value="{{ item.pk }}" name="Tag">{{ item.name }}
+            {% endfor %}
+        </div>
+        <div>
+            <input type="submit" value="提交">
+        </div>
+    </form>
+{% endblock %}
+
+{% block js %}
+<script src="/static/Kindeditor/kindeditor-all.js"></script>
+<script>
+        KindEditor.ready(function(K) {
+                window.editor = K.create('#id_comment',{
+                                    width:"100%",
+                                    resizeType:"1"
+                    });
+        });
+</script>
+{% endblock %}

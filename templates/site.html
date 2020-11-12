@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block xx %}
+    <div class="col-md-9">
+        <ul class="media-list">
+            {% for item in article_obj %}
+                <h4><a class="media-heading"><a href="http://127.0.0.1:8000/{{ item.blog.userinfo.username }}/P/{{ item.id }}">{{ item.title }}</a></h4>
+            <div class="media-left">
+              <a href="#">
+                <img class="media-object" src="media/{{ item.blog.userinfo.avatar }}" alt="..." width="80">
+              </a>
+            </div>
+            <div class="media-body">
+              {{ item.desc }}
+            </div>
+              <br>
+            <div class="pull-right" style="font-size: 13px">
+                <span>posted&nbsp;&nbsp;</span>
+                <span>@&nbsp;&nbsp;</span>
+                <span>{{ item.create_time|date:"Y-m-d"}}&nbsp;&nbsp;</span>
+                <span><a href="/{{ item.blog.userinfo.username }}/">{{ item.blog.userinfo.username }}</a>&nbsp;&nbsp;</span>
+                <span><span class="glyphicon glyphicon-thumbs-up"></span>点赞{{ item.up_num }}</span></span>
+                <span><span class=""></span>评论{{ item.comment_name }}</span></span>
+                <span><a href="#">编辑</a></span>
+                <hr>
+            </div>
+        </ul>
+
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{#from django import template#}
+{#from app01 import models#}
+{#from django.db.models import Count#}
+{#from django.db.models.functions import TruncMonth#}
+{##}
+{#register = template.Library()#}
+{##}
+{#@register.inclusion_tag("left_art.html")#}
+{#def left_art(username):#}
+{#    ret = models.UserInfo.objects.filter(username=username).first()#}
+{#    blog = ret.blog#}
+{##}
+{#    art_list = models.Category.objects.filter(blog=blog).annotate(art_num=Count("article__pk")).values_list("name","art_num")#}
+{##}
+{#    # 拿到当前用户的标签分类以及每个分类下的文章数#}
+{#    tag_list = models.Tag.objects.filter(blog=blog).annotate(tag_num=Count("article__pk")).values_list("name","tag_num")#}
+{##}
+{##}
+{#    # 拿到文章创建事时间，用官网的方法去做#}
+{#    tim_list = models.Article.objects.filter(blog=blog).annotate(month=TruncMonth("create_time")).values("month").annotate(time_num=Count("pk")).values_list("month", "time_num")#}
+{##}
+{#    return locals()#}

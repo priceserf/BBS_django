@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/static/fa1/css/bootstrap.css">
+    <<script src="/static/jquery-3.5.1.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h1 class="text-center">注册</h1>
+                <form id="myform">
+                {% csrf_token %}
+                    {% csrf_token %}
+                    {% for item in form_obj %}
+                        <div class="form-group">
+                        <label for="{{ item.auto_id }}">{{ item.label }}</label>
+                        {{ item }}
+                        <span style="color: red" class="pull-right"></span>
+                        </div>
+                    {% endfor %}
+                    <div class="form-group">
+                        <label for="myfile">头像  {#label配合input使用的，for等于input标签id，点击label标签和input一个效果了#}
+                        {% load static %}       {#设置图片位置#}
+                        <img src="{% static 'img/111.jpg'  %}"  id='myimg' alt="" width="100" style="margin-left:20px">
+                        </label>
+                        <input type="file" id="myfile" name="avatar" style="display: none">
+                    </div>
+                    <div type="button" class="btn btn-primary pull-right" value="注册" id="id_commit">注册</div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script>
+    $('#myfile').change(function () {
+        //生成一个文件阅读器
+        let MyFileReaderObj = new FileReader();
+        //获取用户上传的头像
+        let fileObj = $(this)[0].files[0];
+        //将文件对象交给文件阅读器对象读取
+        MyFileReaderObj.readAsDataURL(fileObj);
+        //上述第三步是一个异步操作，需要让它加载完才能进行第4不
+        MyFileReaderObj.onload = function () {
+            $('#myimg').attr('src',MyFileReaderObj.result )
+        }
+    });
+
+    $("#id_commit").click(function () {
+    //创建一个数据对象
+    let firmDataObj = new FormData()
+    //创建普通键值对
+    //$(#myform).serializeArray()   //拿到form表单下面的所有键值对，name，password。。
+    $.each($("#myform").serializeArray(),function (index,obj) {
+        firmDataObj.append(obj.name,obj.value)
+    })
+        //拿到上传图像文件内容
+    firmDataObj.append('avatar',$("#myfile")[0].files[0])
+
+    $.ajax({
+        url:'',
+        type:"POST",
+        data:firmDataObj,
+        contentType:false,
+        processData:false,
+
+        success:function (arg) {
+            if(arg.code==200){
+                window.location.href = arg.url
+            }else{
+                console.log(arg.msg);   //拿到所有的报错信息
+                $.each(arg.msg,function (indes,obj) {
+                    //ndex == username,obj==错误信息  //obj是一个数组形式
+                    let target_id = "#id_." + indes;   //做一个字符串拼接---> #id_username作为一个id的值方便寻找，这就是第一个username框的id值
+                    $(target_id).next().text(obj[0])    //相当于通过target_id找到错误信息的那一个输入框，next表示下面的一个标签，text写入一个文本内容
+                })
+            }
+        }
+    })
+    })
+</script>
+</body>
+</html>
